@@ -1,0 +1,6 @@
+---
+# handlers file for webserver-role
+- name: restart helloworld service
+  systemd:
+    name: helloworld
+    state: restarted

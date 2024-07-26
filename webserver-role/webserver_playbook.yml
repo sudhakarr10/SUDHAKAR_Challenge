@@ -1,0 +1,54 @@
+---
+- name: Launch EC2 instance and configure web server
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    instance_type: t2.micro
+    image: ami-12345678  # Replace with a valid AMI ID for your region
+    key_name: my-key-pair
+    region: us-west-2
+    security_group: webserver-sg
+
+  tasks:
+    - name: Launch EC2 instance
+      ec2:
+        key_name: "{{ key_name }}"
+        region: "{{ region }}"
+        instance_type: "{{ instance_type }}"
+        image: "{{ image }}"
+        wait: yes
+        group: "{{ security_group }}"
+        count: 1
+        instance_tags:
+          Name: webserver
+      register: ec2
+
+    - name: Add new instance to host group
+      add_host:
+        hostname: "{{ item.public_ip }}"
+        groupname: webserver
+      with_items: "{{ ec2.instances }}"
+
+    - name: Wait for SSH to come up
+      wait_for:
+        host: "{{ item.public_ip }}"
+        port: 22
+        delay: 60
+        timeout: 320
+        state: started
+      with_items: "{{ ec2.instances }}"
+
+- name: Configure web server
+  hosts: webserver
+  become: yes
+  roles:
+    - webserver-role
+
+
+
+---
+- hosts: webservers
+  become: yes
+  roles:
+    - role: webserver-role

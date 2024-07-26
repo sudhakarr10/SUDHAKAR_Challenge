@@ -1,0 +1,56 @@
+---
+- name: Install Java
+  yum:
+    name: "{{ java_package }}"
+    state: present
+
+- name: Copy application JAR to the server
+  copy:
+    src: "{{ app_jar_src }}"
+    dest: "{{ app_jar_dest }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+
+- name: Copy SSL certificate
+  copy:
+    src: "{{ cert_src }}"
+    dest: "{{ ssl_cert_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copy SSL key
+  copy:
+    src: "{{ key_src }}"
+    dest: "{{ ssl_key_path }}"
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Create systemd service
+  template:
+    src: "{{ service_template_src }}"
+    dest: "{{ service_template_dest }}"
+
+- name: Enable and start the service
+  systemd:
+    name: helloworld
+    enabled: yes
+    state: started
+
+- name: Configure firewall to allow HTTPS
+  firewalld:
+    service: https
+    permanent: yes
+    state: enabled
+
+- name: Remove HTTP service from firewall
+  firewalld:
+    service: http
+    permanent: yes
+    state: disabled
+
+- name: Reload firewalld
+  command: firewall-cmd --reload
+  when: ansible_facts['os_family'] == 'RedHat'
