@@ -1,0 +1,12 @@
+---
+ssl_cert_path: "/etc/ssl/certs/helloworld_cert.pem"
+ssl_key_path: "/etc/ssl/private/helloworld_key.pem"
+java_package: "java-1.8.0-openjdk"
+app_user: "ec2-user"
+app_group: "ec2-user"
+app_jar_src: "files/helloworld.jar"
+app_jar_dest: "/opt/helloworld/helloworld.jar"
+cert_src: "files/cert.pem"
+key_src: "files/key.pem"
+service_template_src: "templates/helloworld.service.j2"
+service_template_dest: "/etc/systemd/system/helloworld.service"

@@ -1,0 +1,15 @@
+[Unit]
+Description=Hello World Java Application
+After=network.target
+
+[Service]
+User={{ app_user }}
+ExecStart=/usr/bin/java -jar {{ app_jar_dest }} \
+-Dserver.ssl.key-store={{ ssl_key_path }} \
+-Dserver.ssl.key-store-password=changeit \
+-Dserver.ssl.key-alias=selfsigned \
+-Dserver.ssl.key-store-type=PEM
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
